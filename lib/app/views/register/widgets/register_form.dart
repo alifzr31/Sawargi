@@ -82,115 +82,129 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: Colors.white,
-        elevation: 1,
-        clipBehavior: Clip.antiAlias,
-        borderRadius: BorderRadius.circular(10.r),
-        child: Column(
-          children: [
-            RegisterFormHeader(
-              currentPage: _currentPage,
-              pageController: _pageController,
-            ),
-            SizedBox(height: 10.h),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPage = index;
-                  });
-                },
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  FirstSectionForm(
-                    pageController: _pageController,
-                    formKey: _firstFormKey,
-                    nikController: _nikController,
-                    dummyFindNik: _dummyFindNik,
-                    noKKController: _noKKController,
-                    namaController: _namaController,
-                    noTelpController: _noTelpController,
-                    alamatController: _alamatController,
-                  ),
-                  SecondSectionForm(
-                    formKey: _secondFormKey,
-                    nikController: _nikController,
-                    passwordController: _passwordController,
-                    obscurePass: obscurePass,
-                    onPressedObscurePass: () {
-                      setState(() {
-                        obscurePass = !obscurePass;
-                      });
-                    },
-                    passwordConfirmController: _passwordConfirmController,
-                    obscurePassConfirm: obscurePassConfirm,
-                    onPressedObscurePassConfirm: () {
-                      setState(() {
-                        obscurePassConfirm = !obscurePassConfirm;
-                      });
-                    },
-                  ),
-                ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (_currentPage == 0) {
+          context.pop();
+        } else {
+          _pageController.animateToPage(
+            0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOutCubic,
+          );
+        }
+      },
+      child: Expanded(
+        child: Material(
+          color: Colors.white,
+          elevation: 1,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: BorderRadius.circular(10.r),
+          child: Column(
+            children: [
+              RegisterFormHeader(
+                currentPage: _currentPage,
+                pageController: _pageController,
               ),
-            ),
-            SizedBox(height: 10.h),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: SizedBox(
-                height: 35.h,
-                width: double.infinity,
-                child:
-                    _currentPage == 0
-                        ? BaseButtonIcon(
-                          bgColor: AppColors.amberColor,
-                          fgColor: Colors.white,
-                          label: 'Lanjut',
-                          icon: MingCute.arrow_right_line,
-                          onPressed: () {
-                            if (_firstFormKey.currentState?.validate() ??
-                                false) {
-                              _pageController.animateToPage(
-                                1,
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeInOutCubic,
-                              );
-                            }
-                          },
-                        )
-                        : BaseButton(
-                          bgColor: AppColors.amberColor,
-                          fgColor: Colors.white,
-                          label: 'Daftar',
-                          onPressed: () async {
-                            if (_secondFormKey.currentState?.validate() ??
-                                false) {
-                              context.loaderOverlay.show();
+              SizedBox(height: 10.h),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    FirstSectionForm(
+                      pageController: _pageController,
+                      formKey: _firstFormKey,
+                      nikController: _nikController,
+                      dummyFindNik: _dummyFindNik,
+                      noKKController: _noKKController,
+                      namaController: _namaController,
+                      noTelpController: _noTelpController,
+                      alamatController: _alamatController,
+                    ),
+                    SecondSectionForm(
+                      formKey: _secondFormKey,
+                      nikController: _nikController,
+                      passwordController: _passwordController,
+                      obscurePass: obscurePass,
+                      onPressedObscurePass: () {
+                        setState(() {
+                          obscurePass = !obscurePass;
+                        });
+                      },
+                      passwordConfirmController: _passwordConfirmController,
+                      obscurePassConfirm: obscurePassConfirm,
+                      onPressedObscurePassConfirm: () {
+                        setState(() {
+                          obscurePassConfirm = !obscurePassConfirm;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: SizedBox(
+                  height: 35.h,
+                  width: double.infinity,
+                  child:
+                      _currentPage == 0
+                          ? BaseButtonIcon(
+                            bgColor: AppColors.amberColor,
+                            fgColor: Colors.white,
+                            label: 'Lanjut',
+                            icon: MingCute.arrow_right_line,
+                            onPressed: () {
+                              if (_firstFormKey.currentState?.validate() ??
+                                  false) {
+                                _pageController.animateToPage(
+                                  1,
+                                  duration: const Duration(milliseconds: 500),
+                                  curve: Curves.easeInOutCubic,
+                                );
+                              }
+                            },
+                          )
+                          : BaseButton(
+                            bgColor: AppColors.amberColor,
+                            fgColor: Colors.white,
+                            label: 'Daftar',
+                            onPressed: () async {
+                              if (_secondFormKey.currentState?.validate() ??
+                                  false) {
+                                context.loaderOverlay.show();
 
-                              await Future.delayed(
-                                const Duration(milliseconds: 1500),
-                                () {
-                                  if (context.mounted) {
-                                    context.loaderOverlay.hide();
-                                    context.pop();
-                                    showCustomToast(
-                                      context,
-                                      type: ToastificationType.success,
-                                      title: 'Daftar Berhasil',
-                                      description:
-                                          'Akun anda berhasil didaftarkan, silahkan masuk dengan NIK dan kata sandi yang sudah anda daftarkan',
-                                    );
-                                  }
-                                },
-                              );
-                            }
-                          },
-                        ),
+                                await Future.delayed(
+                                  const Duration(milliseconds: 1500),
+                                  () {
+                                    if (context.mounted) {
+                                      context.loaderOverlay.hide();
+                                      context.pop();
+                                      showCustomToast(
+                                        context,
+                                        type: ToastificationType.success,
+                                        title: 'Daftar Berhasil',
+                                        description:
+                                            'Akun anda berhasil didaftarkan, silahkan masuk dengan NIK dan kata sandi yang sudah anda daftarkan',
+                                      );
+                                    }
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
