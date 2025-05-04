@@ -28,7 +28,7 @@ class BaseTextButton extends StatelessWidget {
         text,
         style: TextStyle(
           fontSize: size ?? 12.sp,
-          fontFamily: 'Poppins',
+          fontFamily: 'Plus Jakarta Sans',
           fontWeight: FontWeight.w500,
           decoration: decoration,
           color: color,

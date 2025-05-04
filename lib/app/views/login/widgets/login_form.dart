@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:sawargi/app/utils/app_colors.dart';
 import 'package:sawargi/app/utils/app_strings.dart';
+import 'package:sawargi/app/views/dashboard/dashboard_page.dart';
 import 'package:sawargi/app/views/register/register_page.dart';
 import 'package:sawargi/app/widgets/base_button.dart';
 import 'package:sawargi/app/widgets/base_formfield.dart';
@@ -114,7 +114,12 @@ class _LoginFormState extends State<LoginForm> {
               fgColor: Colors.white,
               label: 'Masuk',
               onPressed: () {
-                if (_formKey.currentState?.validate() ?? false) {}
+                if (_formKey.currentState?.validate() ?? false) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    DashboardPage.routeName,
+                  );
+                }
               },
             ),
           ),
@@ -144,7 +149,7 @@ class _LoginFormState extends State<LoginForm> {
               fgColor: AppColors.amberColor,
               label: 'Daftar Sekarang',
               onPressed: () {
-                context.push(RegisterPage.routeName);
+                Navigator.pushNamed(context, RegisterPage.routeName);
               },
             ),
           ),

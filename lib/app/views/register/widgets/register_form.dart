@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:sawargi/app/cubits/auth/auth_cubit.dart';
+import 'package:sawargi/app/models/anggota_kependudukan.dart';
 import 'package:sawargi/app/utils/app_colors.dart';
+import 'package:sawargi/app/utils/app_helpers.dart';
 import 'package:sawargi/app/views/register/components/registerform_header.dart';
 import 'package:sawargi/app/views/register/widgets/firstsection_form.dart';
 import 'package:sawargi/app/views/register/widgets/secondsection_form.dart';
@@ -26,44 +30,58 @@ class _RegisterFormState extends State<RegisterForm> {
   final _nikController = TextEditingController();
   final _noKKController = TextEditingController();
   final _namaController = TextEditingController();
-  final _noTelpController = TextEditingController();
+  final listJk = const ['laki-laki', 'perempuan'];
+  String? selectedJk;
+  bool showJkValidate = false;
+  final _tempatLahirController = TextEditingController();
+  final _tglLahirController = TextEditingController();
+  DateTime? selectedTglLahir;
+  String? selectedTglLahirString;
   final _alamatController = TextEditingController();
-
   final _secondFormKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   bool obscurePass = true;
   final _passwordConfirmController = TextEditingController();
   bool obscurePassConfirm = true;
 
-  void _dummyFindNik(String? value) async {
-    if (value!.length == 16) {
-      context.loaderOverlay.show();
-
-      await Future.delayed(const Duration(milliseconds: 1500), () {
-        if (mounted) {
-          if (_nikController.text == '1234567890123456') {
-            _noKKController.text = '6543210123456789';
-            _namaController.text = 'Alif Zakya Rafiq';
-            _noTelpController.text = '081221112586';
-            _alamatController.text =
-                'Blok Citopeng No. 327 RT 06 RW 22, Kelurahan Melong, Kecamatan Cimahi Selatan, Kota Cimahi, Jawa Barat, Indonesia 40534';
-          } else {
-            _noKKController.clear();
-            _namaController.clear();
-            _noTelpController.clear();
-            _alamatController.clear();
-            showCustomToast(
-              context,
-              type: ToastificationType.error,
-              title: 'NIK Tidak Ditemukan',
-              description:
-                  'Mohon maaf data penduduk dengan NIK ${_nikController.text} tidak ditemukan',
-            );
-          }
-
-          context.loaderOverlay.hide();
-        }
+  void _findNik(AnggotaKependudukan? anggotaKependudukan) async {
+    if (anggotaKependudukan != null) {
+      _noKKController.text = anggotaKependudukan.nomorKk ?? '';
+      _namaController.text = anggotaKependudukan.nama ?? '';
+      setState(() {
+        selectedJk = anggotaKependudukan.jenisKelamin?.toLowerCase();
+        showJkValidate = false;
+        selectedTglLahirString = AppHelpers.databaseDateFormat(
+          anggotaKependudukan.tanggalLahir ?? DateTime(0000),
+        );
+        selectedTglLahir = DateFormat(
+          'yyyy-MM-dd',
+        ).parse(selectedTglLahirString ?? '');
       });
+      _tempatLahirController.text = anggotaKependudukan.tempatLahir ?? '';
+      _tglLahirController.text = AppHelpers.dayMonthYearFormat(
+        anggotaKependudukan.tanggalLahir ?? DateTime(0000),
+      );
+      _alamatController.text = anggotaKependudukan.alamat ?? '';
+      _firstFormKey.currentState?.validate();
+    } else {
+      _noKKController.clear();
+      _namaController.clear();
+      setState(() {
+        selectedJk = null;
+        showJkValidate = false;
+        selectedTglLahirString = null;
+        selectedTglLahir = null;
+      });
+      _tempatLahirController.clear();
+      _tglLahirController.clear();
+      _alamatController.clear();
+      showCustomToast(
+        context,
+        type: ToastificationType.error,
+        title: 'NIK Tidak Ditemukan',
+        description: context.read<AuthCubit>().state.nikError,
+      );
     }
   }
 
@@ -73,7 +91,8 @@ class _RegisterFormState extends State<RegisterForm> {
     _nikController.dispose();
     _noKKController.dispose();
     _namaController.dispose();
-    _noTelpController.dispose();
+    _tempatLahirController.dispose();
+    _tglLahirController.dispose();
     _alamatController.dispose();
     _passwordController.dispose();
     _passwordConfirmController.dispose();
@@ -85,14 +104,17 @@ class _RegisterFormState extends State<RegisterForm> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (_currentPage == 0) {
-          context.pop();
-        } else {
-          _pageController.animateToPage(
-            0,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOutCubic,
-          );
+        if (!didPop) {
+          if (_currentPage == 0) {
+            Navigator.pop(context);
+            context.read<AuthCubit>().resetRegisterState();
+          } else {
+            _pageController.animateToPage(
+              0,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOutCubic,
+            );
+          }
         }
       },
       child: Expanded(
@@ -122,10 +144,35 @@ class _RegisterFormState extends State<RegisterForm> {
                       pageController: _pageController,
                       formKey: _firstFormKey,
                       nikController: _nikController,
-                      dummyFindNik: _dummyFindNik,
+                      findNik: _findNik,
+                      nikListener: (context, state) {
+                        if (state.nikStatus == NikStatus.loading) {
+                          context.loaderOverlay.show();
+                        }
+
+                        if (state.nikStatus == NikStatus.success) {
+                          context.loaderOverlay.hide();
+                          _findNik(state.anggotaKependudukan);
+                        }
+
+                        if (state.nikStatus == NikStatus.error) {
+                          context.loaderOverlay.hide();
+                          showCustomToast(
+                            context,
+                            type: ToastificationType.error,
+                            title: 'NIK Tidak Ditemukan',
+                            description: state.nikError,
+                          );
+                        }
+                      },
                       noKKController: _noKKController,
                       namaController: _namaController,
-                      noTelpController: _noTelpController,
+                      listJk: listJk,
+                      selectedJk: selectedJk,
+                      showJkValidate: showJkValidate,
+                      tglLahirController: _tglLahirController,
+                      tempatLahirController: _tempatLahirController,
+                      selectedTglLahir: selectedTglLahir,
                       alamatController: _alamatController,
                     ),
                     SecondSectionForm(
@@ -163,43 +210,74 @@ class _RegisterFormState extends State<RegisterForm> {
                             label: 'Lanjut',
                             icon: MingCute.arrow_right_line,
                             onPressed: () {
+                              setState(() {
+                                showJkValidate =
+                                    selectedJk == null ? true : false;
+                              });
+
                               if (_firstFormKey.currentState?.validate() ??
                                   false) {
-                                _pageController.animateToPage(
-                                  1,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.easeInOutCubic,
-                                );
+                                if (selectedJk != null) {
+                                  _pageController.animateToPage(
+                                    1,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeInOutCubic,
+                                  );
+                                }
                               }
                             },
                           )
-                          : BaseButton(
-                            bgColor: AppColors.amberColor,
-                            fgColor: Colors.white,
-                            label: 'Daftar',
-                            onPressed: () async {
-                              if (_secondFormKey.currentState?.validate() ??
-                                  false) {
+                          : BlocListener<AuthCubit, AuthState>(
+                            listenWhen:
+                                (previous, current) =>
+                                    previous.registerStatus !=
+                                    current.registerStatus,
+                            listener: (context, state) {
+                              if (state.registerStatus ==
+                                  RegisterStatus.loading) {
                                 context.loaderOverlay.show();
+                              }
 
-                                await Future.delayed(
-                                  const Duration(milliseconds: 1500),
-                                  () {
-                                    if (context.mounted) {
-                                      context.loaderOverlay.hide();
-                                      context.pop();
-                                      showCustomToast(
-                                        context,
-                                        type: ToastificationType.success,
-                                        title: 'Daftar Berhasil',
-                                        description:
-                                            'Akun anda berhasil didaftarkan, silahkan masuk dengan NIK dan kata sandi yang sudah anda daftarkan',
-                                      );
-                                    }
-                                  },
+                              if (state.registerStatus ==
+                                  RegisterStatus.success) {
+                                context.loaderOverlay.hide();
+                                Navigator.pop(context);
+                                context.read<AuthCubit>().resetRegisterState();
+                                showCustomToast(
+                                  context,
+                                  type: ToastificationType.success,
+                                  title: 'Daftar Berhasil',
+                                  description:
+                                      state.registerResponse.toString(),
+                                );
+                              }
+
+                              if (state.registerStatus ==
+                                  RegisterStatus.error) {
+                                context.loaderOverlay.hide();
+                                showCustomToast(
+                                  context,
+                                  type: ToastificationType.error,
+                                  title: 'Daftar Gagal',
+                                  description: state.registerError,
                                 );
                               }
                             },
+                            child: BaseButton(
+                              bgColor: AppColors.amberColor,
+                              fgColor: Colors.white,
+                              label: 'Daftar',
+                              onPressed: () async {
+                                if (_secondFormKey.currentState?.validate() ??
+                                    false) {
+                                  context.read<AuthCubit>().register(
+                                    nik: _nikController.text,
+                                    name: _namaController.text,
+                                    password: _passwordController.text,
+                                  );
+                                }
+                              },
+                            ),
                           ),
                 ),
               ),

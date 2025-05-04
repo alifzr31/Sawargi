@@ -1,162 +1,109 @@
 import 'package:sawargi/app/utils/app_colors.dart';
+import 'package:sawargi/app/widgets/base_formfield.dart';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart'
+    as picker;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class BaseFormField extends StatelessWidget {
-  const BaseFormField({
-    super.key,
+class BaseDatePickerField extends StatelessWidget {
+  const BaseDatePickerField({
+    required this.pickerModel,
     this.hint,
     this.controller,
     this.focusNode,
     this.prefixIcon,
     this.suffixIcon,
-    this.obscureText = false,
-    this.keyboardType,
-    this.textInputAction,
-    this.maxLines = 1,
-    this.maxLength,
     this.validator,
     this.helperText,
     this.helperTextColor,
-    this.onChanged,
-    this.onTap,
-    this.readOnly = false,
-    this.hintColor,
-    this.borderColor,
-    this.initialValue,
+    this.onConfirmDate,
+    super.key,
   });
 
+  final picker.BasePickerModel pickerModel;
   final String? hint;
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final int? maxLines;
-  final int? maxLength;
   final String? Function(String?)? validator;
   final String? helperText;
   final Color? helperTextColor;
-  final void Function(String?)? onChanged;
-  final String? initialValue;
-  final bool readOnly;
-  final Color? hintColor;
-  final Color? borderColor;
-  final void Function()? onTap;
+  final dynamic Function(DateTime)? onConfirmDate;
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
+    return BaseFormField(
       controller: controller,
+      hint: hint,
+      helperText: helperText,
+      helperTextColor: helperTextColor,
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
       focusNode: focusNode,
-      maxLines: maxLines,
-      maxLength: maxLength,
-      cursorColor: AppColors.tealColor,
-      style: TextStyle(
-        fontSize: 14.sp,
-        color: readOnly ? Colors.grey.shade600 : null,
-      ),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(
-          fontSize: 14.sp,
-          color: hintColor ?? Colors.grey.shade400,
-          fontWeight: FontWeight.w500,
-        ),
-        helperText: helperText,
-        helperMaxLines: 2,
-        errorMaxLines: 2,
-        helperStyle: TextStyle(fontSize: 10.sp, color: helperTextColor),
-        errorStyle: TextStyle(fontSize: 10.sp),
-        counterText: '',
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 7.h, horizontal: 10),
-        prefixIcon:
-            prefixIcon == null
-                ? null
-                : Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 2),
-                  child: prefixIcon,
-                ),
-        prefixIconConstraints: BoxConstraints(minHeight: 26.r, minWidth: 26.r),
-        suffixIcon:
-            suffixIcon == null
-                ? null
-                : Padding(
-                  padding: const EdgeInsets.only(left: 2, right: 10),
-                  child: suffixIcon,
-                ),
-        suffixIconConstraints: BoxConstraints(minHeight: 26.r, minWidth: 26.r),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(color: borderColor ?? AppColors.greyFormField),
-          borderRadius: BorderRadius.all(Radius.circular(8.r)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: borderColor ?? AppColors.greyFormField),
-          borderRadius: BorderRadius.all(Radius.circular(8.r)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: borderColor ?? AppColors.greyFormField),
-          borderRadius: BorderRadius.all(Radius.circular(8.r)),
-        ),
-      ),
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
       validator: validator,
-      onChanged: onChanged,
-      onTap: onTap,
-      readOnly: readOnly,
-      initialValue: initialValue,
+      readOnly: true,
+      onTap: () {
+        picker.DatePicker.showPicker(
+          context,
+          pickerModel: pickerModel,
+          theme: picker.DatePickerTheme(
+            itemStyle: TextStyle(
+              fontSize: 14.sp,
+              fontFamily: 'Plus Jakarta Sans',
+            ),
+            cancelStyle: TextStyle(
+              fontSize: 14.sp,
+              fontFamily: 'Plus Jakarta Sans',
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+            doneStyle: TextStyle(
+              fontSize: 14.sp,
+              fontFamily: 'Plus Jakarta Sans',
+              color: AppColors.blueColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          locale: picker.LocaleType.id,
+          onConfirm: onConfirmDate,
+        );
+      },
     );
   }
 }
 
-class BaseFormGroupField extends StatelessWidget {
-  const BaseFormGroupField({
-    super.key,
+class BaseDatePickerGroupField extends StatelessWidget {
+  const BaseDatePickerGroupField({
     required this.label,
-    this.mandatory = false,
+    required this.pickerModel,
     this.hint,
+    this.mandatory = false,
     this.controller,
     this.focusNode,
+    this.readOnly = false,
     this.prefixIcon,
     this.suffixIcon,
-    this.obscureText = false,
-    this.keyboardType,
-    this.textInputAction,
-    this.maxLines = 1,
-    this.maxLength,
     this.validator,
     this.helperText,
     this.helperTextColor,
-    this.onChanged,
-    this.onTap,
-    this.readOnly = false,
-    this.initialValue,
+    this.onConfirmDate,
+    super.key,
   });
 
   final String label;
-  final bool mandatory;
+  final picker.BasePickerModel pickerModel;
   final String? hint;
+  final bool mandatory;
   final TextEditingController? controller;
   final FocusNode? focusNode;
+  final bool readOnly;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final int? maxLines;
-  final int? maxLength;
   final String? Function(String?)? validator;
   final String? helperText;
   final Color? helperTextColor;
-  final void Function(String?)? onChanged;
-  final String? initialValue;
-  final bool readOnly;
-  final void Function()? onTap;
+  final dynamic Function(DateTime)? onConfirmDate;
 
   @override
   Widget build(BuildContext context) {
@@ -192,8 +139,37 @@ class BaseFormGroupField extends StatelessWidget {
         TextFormField(
           controller: controller,
           focusNode: focusNode,
-          maxLines: maxLines,
-          maxLength: maxLength,
+          validator: validator,
+          readOnly: true,
+          onTap:
+              readOnly
+                  ? null
+                  : () {
+                    picker.DatePicker.showPicker(
+                      context,
+                      pickerModel: pickerModel,
+                      theme: picker.DatePickerTheme(
+                        itemStyle: TextStyle(
+                          fontSize: 14.sp,
+                          fontFamily: 'Plus Jakarta Sans',
+                        ),
+                        cancelStyle: TextStyle(
+                          fontSize: 14.sp,
+                          fontFamily: 'Plus Jakarta Sans',
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        doneStyle: TextStyle(
+                          fontSize: 14.sp,
+                          fontFamily: 'Plus Jakarta Sans',
+                          color: AppColors.blueColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      locale: picker.LocaleType.id,
+                      onConfirm: onConfirmDate,
+                    );
+                  },
           cursorColor: AppColors.tealColor,
           style: TextStyle(
             fontSize: 14.sp,
@@ -209,9 +185,11 @@ class BaseFormGroupField extends StatelessWidget {
             helperText: helperText,
             helperMaxLines: 2,
             errorMaxLines: 2,
-            counterText: '',
             helperStyle: TextStyle(fontSize: 10.sp, color: helperTextColor),
             errorStyle: TextStyle(fontSize: 10.sp),
+            counterText: '',
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(vertical: 7.h, horizontal: 10),
             prefixIcon:
                 prefixIcon == null
                     ? null
@@ -234,8 +212,6 @@ class BaseFormGroupField extends StatelessWidget {
               minHeight: 26.r,
               minWidth: 26.r,
             ),
-            isDense: true,
-            contentPadding: EdgeInsets.symmetric(vertical: 7.h, horizontal: 10),
             border: OutlineInputBorder(
               borderSide: BorderSide(color: AppColors.greyFormField),
               borderRadius: BorderRadius.all(Radius.circular(8.r)),
@@ -249,14 +225,6 @@ class BaseFormGroupField extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(8.r)),
             ),
           ),
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          validator: validator,
-          onChanged: onChanged,
-          onTap: onTap,
-          readOnly: readOnly,
-          initialValue: initialValue,
         ),
       ],
     );

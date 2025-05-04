@@ -52,6 +52,8 @@ dependencies:
   toastification: ^3.0.2
   icons_plus: ^5.0.0
   page_transition: ^2.2.1
+  animated_bottom_navigation_bar: ^1.4.0
+  flutter_datetime_picker_plus: ^2.2.0
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:sawargi/app/utils/app_colors.dart';
 import 'package:sawargi/app/widgets/base_formfield.dart';
+import 'package:sawargi/app/widgets/base_forminfo.dart';
 import 'package:sawargi/app/widgets/base_iconbutton.dart';
 
 class SecondSectionForm extends StatelessWidget {
@@ -31,11 +31,17 @@ class SecondSectionForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 2),
       child: Form(
         key: formKey,
         child: Column(
           children: [
+            BaseFormInfo(
+              bgColor: Colors.blue.shade100,
+              fgColor: Colors.blue.shade700,
+              message: 'Buat kata sandi baru untuk akun anda',
+            ),
+            SizedBox(height: 10.h),
             BaseFormGroupField(
               label: 'NIK',
               hint: 'Masukkan NIK anda',

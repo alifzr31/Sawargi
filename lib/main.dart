@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:sawargi/app/configs/router/app_router.dart';
+import 'package:sawargi/app/cubits/auth/auth_cubit.dart';
 import 'package:sawargi/app/utils/app_colors.dart';
+import 'package:sawargi/app/views/splash/splash_page.dart';
 
 import 'app/configs/get_it/service_locator.dart' as di;
 
@@ -31,45 +34,53 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      minTextAdapt: true,
-      splitScreenMode: true,
-      useInheritedMediaQuery: true,
-      builder: (context, child) {
-        return GlobalLoaderOverlay(
-          overlayColor: Colors.black.withValues(alpha: 0.4),
-          disableBackButton: true,
-          overlayWholeScreen: true,
-          overlayHeight: ScreenUtil().screenHeight,
-          overlayWidth: ScreenUtil().screenWidth,
-          overlayWidgetBuilder: (progress) {
-            return Center(
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
+    return MultiBlocProvider(
+      providers: [BlocProvider(create: (context) => di.sl<AuthCubit>())],
+      child: ScreenUtilInit(
+        minTextAdapt: true,
+        splitScreenMode: true,
+        useInheritedMediaQuery: true,
+        builder: (context, child) {
+          return GlobalLoaderOverlay(
+            overlayColor: Colors.black.withValues(alpha: 0.4),
+            disableBackButton: true,
+            overlayWholeScreen: true,
+            overlayHeight: ScreenUtil().screenHeight,
+            overlayWidth: ScreenUtil().screenWidth,
+            overlayWidgetBuilder: (progress) {
+              return Center(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const CircularProgressIndicator(
+                    color: AppColors.tealColor,
+                  ),
                 ),
-                child: const CircularProgressIndicator(
-                  color: AppColors.tealColor,
+              );
+            },
+            child: MaterialApp(
+              title: 'Sawargi',
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: AppColors.tealColor,
                 ),
+                scaffoldBackgroundColor: AppColors.scaffoldBgColor,
+                fontFamily: 'Plus Jakarta Sans',
+                useMaterial3: true,
+                applyElevationOverlayColor: false,
               ),
-            );
-          },
-          child: MaterialApp.router(
-            title: 'Sawargi',
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: AppColors.tealColor),
-              scaffoldBackgroundColor: AppColors.scaffoldBgColor,
-              fontFamily: 'Plus Jakarta Sans',
-              useMaterial3: true,
-              applyElevationOverlayColor: false,
+              initialRoute: SplashPage.routeName,
+              onGenerateRoute: (settings) {
+                return AppRouter.onGenerateRoute(context, settings);
+              },
             ),
-            routerConfig: AppRouter.router,
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
